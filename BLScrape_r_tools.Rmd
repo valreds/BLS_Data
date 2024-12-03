@@ -1,0 +1,117 @@
+
+
+```{r}
+# install.packages('blscrapeR')
+#load/install packages
+library('blscrapeR')
+# bls_key = '2f07e9b2502f4b28b178b0c030fe1753'
+library('ggplot2')
+```
+
+```{r}
+# set_bls_key(key = '2f07e9b2502f4b28b178b0c030fe1753', o )
+# readRenviron('~/.Renviron')
+Sys.getenv('BLS_KEY')
+```
+
+```{r}
+# prefix = 'LASST01'
+# suffix = '0000000000003'
+# numbers = 1
+# toString(prefix + suffix)
+```
+
+
+```{r}
+# codes = []
+# prefix = 'LASST01'
+# suffix = '0000000000003'
+# for number in range(57):
+# 
+#     if number <=9:
+#         codes.append(prefix[:6]+str(number)+suffix)
+#     if number >=10:
+#         codes.append(prefix[:5]+str(number)+suffix)
+# print(codes[1])
+# codes = list()
+# for (i in 1:57){
+#   if (i <= 9){
+#     print('small')
+#   } else {
+#       print(i)
+#   }
+# }
+```
+
+```{r}
+#test 1 usn the BLS API to bring the data from a seriesID
+df_Alabama = bls_api('LASST060000000000003', startyear = "2018", endyear = '2021', registrationKey = 'BLS_KEY')
+df_Alabama
+#for multiple series, add them as bls_api(c())
+```
+
+```{r}
+#creating list of months by name
+names_month =month.name
+#apply function to add year to each month
+yr_2015 <-lapply(names_month, function(i) (paste(i, '2015')))
+yr_2016 <-lapply(names_month, function(i) (paste(i, '2016')))
+yr_2017 <-lapply(names_month, function(i) (paste(i, '2017')))
+yr_2018 <-lapply(names_month, function(i) (paste(i, '2018')))
+yr_2019 <-lapply(names_month, function(i) (paste(i, '2019')))                
+yr_2020 <-lapply(names_month, function(i) (paste(i, '2020')))
+#not all data from 2021 is available yet, only January to April
+#this line needs to be updated each month by adding the next month in the list
+#example:for the july extraction, add 'May 2021'
+months21 = c('January 2021', 'February 2021', 'March 2021', 'April 2021')
+```
+
+```{r}
+# county_data_al = get_bls_state(state.name='Alabama')
+# county_data_al
+# state_level_al = get_bls_county( stateName ='Alabama')
+# state_level_al
+```
+
+```{r}
+#get state data by month from year 2015-2021
+state_yr15_21 = get_bls_state(date_mth=c(yr_2015, yr_2016, yr_2017, yr_2018, yr_2019,yr_2020,months21))
+# state_monthly20 = get_bls_state(date_mth=months20, seasonality=FALSE)
+# state_monthly21 = get_bls_state(date_mth=months21, seasonality=FALSE)
+head(state_yr15_21)
+ncol(state_yr15_21)
+```
+```{r}
+state_yr15_21$month <- as.Date(state_yr15_21$month)
+state_yr15_21$year <- as.numeric(format(state_yr15_21$month, "%Y"))
+state_yr15_21$month<- format(state_yr15_21$month, "%m")
+head(state_yr15_21)
+```
+
+
+
+
+```{r}
+getwd()
+```
+
+
+```{r}
+# getwd()
+write.csv(state_yr15_21, file = "bls_state.csv",
+            sep = " ", row.names = FALSE, col.names = TRUE)
+```
+```{r}
+state_yr21 = get_bls_state(date_mth='January 2020', seasonality = TRUE)
+state_yr21
+```
+
+
+
+
+
+```{r}
+plot_state = bls_map_state(map_data = state_yr21,fill_rate = 'labor_force', labtitle='Alabama counties labor froce', lowFill = 'Cyan', highFill = 'Red')
+plot_state
+```
+
